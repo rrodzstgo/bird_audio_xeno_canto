@@ -14,3 +14,7 @@ recordings_df['lng'] = recordings_df['lng'].astype(float)
 st.map(recordings_df,
     latitude='lat',
     longitude='lng')
+
+st.bar_chart(recordings_df, x = 'gen', y = 'alt')
+
+st.dataframe(recordings_df)
