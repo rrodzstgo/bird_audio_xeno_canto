@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import folium
 import streamlit as st   
 import pydeck as pdk
 
@@ -53,15 +52,6 @@ st.pydeck_chart(
         },
     )
 )
-
-# Update the audio player to play the recording of the selected dot
-if selected_point:
-    selected_row = recordings_df[
-        (recordings_df["lat"] == selected_point["lat"]) & 
-        (recordings_df["lng"] == selected_point["lng"])
-    ].index[0]
-    audio_file_url = recordings_df.loc[selected_row, 'file']
-    st.audio(audio_file_url)
 
 # Add a selection box to select a row from the dataframe
 if "selected_row" not in st.session_state:
