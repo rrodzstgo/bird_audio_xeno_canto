@@ -48,7 +48,7 @@ st.pydeck_chart(
         layers=[layer],
         initial_view_state=view_state,
         tooltip={
-            "html": "<b>Genus:</b> {gen}<br><b>Altitude:</b> {alt}<br><b>File:</b> {file}",
+            "html": "<b>Scientific Name:</b> {gen} {sp}<br><b>Common Name:</b> {en}<br><br>Location:</b>{loc}",
             "style": {"backgroundColor": "steelblue", "color": "white"},
         },
     )
@@ -76,7 +76,7 @@ selected_row = st.selectbox(
 )
 
 # Update the audio player to play the recording of the selected row
-çaudio_file_url = recordings_df.loc[st.session_state["selected_row"], 'file']
+audio_file_url = recordings_df.loc[st.session_state["selected_row"], 'file']
 st.audio(audio_file_url)
 
 # Display the full table without filtering
