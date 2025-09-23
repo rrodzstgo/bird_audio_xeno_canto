@@ -1,73 +1,73 @@
 import pandas as pd
-import numpy as np
-import streamlit as st   
-import pydeck as pdk
+import streamlit as st
+from streamlit_folium import st_folium
+import folium
 
-puerto_rico_bird_recordings = pd.read_json('puerto_rico_recordings.json')
-recordings_df = pd.DataFrame(puerto_rico_bird_recordings['recordings'].tolist())
-recordings_df = recordings_df.query('file != "" and lng.notnull() and lat.notnull()')
+# ---- LOAD DATA ----
+puerto_rico_bird_recordings = pd.read_json("puerto_rico_recordings.json")
+recordings_df = pd.DataFrame(puerto_rico_bird_recordings["recordings"].tolist())
+recordings_df = recordings_df.query("file != '' and lng.notnull() and lat.notnull()")
 
-recordings_df['lat'] = recordings_df['lat'].astype(float)
-recordings_df['lng'] = recordings_df['lng'].astype(float)
+recordings_df["lat"] = recordings_df["lat"].astype(float)
+recordings_df["lng"] = recordings_df["lng"].astype(float)
 
-st.title('Puerto Rico Bird Recordings')
+st.title("Puerto Rico Bird Recordings")
 
-# Add a map click handler to synchronize the selected dot with the recording
-selected_point = st.session_state.get("selected_point", None)
-
-# Modify the map click handler to properly update the selected point
-def on_map_click(event):
-    if event and "object" in event:
-        st.session_state["selected_point"] = event["object"]
-
-# Ensure selected_point is retrieved from session state
-selected_point = st.session_state.get("selected_point")
-
-# Update the Pydeck layer to include the click handler
-layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=recordings_df,
-    get_position=["lng", "lat"],
-    get_radius=400,
-    get_fill_color=[200, 30, 0, 160],
-    pickable=True,
-)
-
-# Define the Pydeck view
-view_state = pdk.ViewState(
-    latitude=recordings_df["lat"].mean(),
-    longitude=recordings_df["lng"].mean(),
-    zoom=7,
-    pitch=0,
-)
-
-# Add the map with tooltips and click handling
-st.pydeck_chart(
-    pdk.Deck(
-        layers=[layer],
-        initial_view_state=view_state,
-        tooltip={
-            "html": "<b>Scientific Name:</b> {gen} {sp}<br><b>Common Name:</b> {en}<br><br>Location:</b>{loc}",
-            "style": {"backgroundColor": "steelblue", "color": "white"},
-        },
-    )
-)
-
-# Add a selection box to select a row from the dataframe
+# ---- SESSION STATE ----
 if "selected_row" not in st.session_state:
     st.session_state["selected_row"] = recordings_df.index[0]
 
+# ---- COLOR FUNCTION ----
+def get_marker_color(idx):
+    if idx == st.session_state["selected_row"]:
+        return "red"  # highlight selected
+    return "blue"     # default color
+
+# ---- CREATE MAP ----
+m = folium.Map(
+    location=[recordings_df["lat"].mean(), recordings_df["lng"].mean()],
+    zoom_start=7,
+)
+
+# Add markers for each recording
+for idx, row in recordings_df.iterrows():
+    popup_html = f"""
+    <b>{row['gen']} {row['sp']}</b><br>
+    Common: {row['en']}<br>
+    Location: {row['loc']}<br>
+    Type: {row['type']}<br>
+    <i>Click marker to select</i>
+    """
+    folium.Marker(
+        location=[row["lat"], row["lng"]],
+        tooltip=row["en"],
+        popup=popup_html,
+        icon=folium.Icon(color=get_marker_color(idx)),
+    ).add_to(m)
+
+# Render map with click tracking
+map_data = st_folium(m, width=700, height=500)
+
+# ---- UPDATE SELECTION FROM MAP ----
+if map_data and map_data.get("last_object_clicked_tooltip"):
+    clicked_name = map_data["last_object_clicked_tooltip"]
+    match = recordings_df[recordings_df["en"] == clicked_name]
+    if not match.empty:
+        st.session_state["selected_row"] = match.index[0]
+
+# ---- SELECTION BOX ----
 selected_row = st.selectbox(
     "Select a recording to play:",
     recordings_df.index,
     index=recordings_df.index.get_loc(st.session_state["selected_row"]),
-    format_func=lambda idx: f"{recordings_df.loc[idx, 'gen']} - {recordings_df.loc[idx, 'sp']} - {recordings_df.loc[idx, 'en']} - {recordings_df.loc[idx, 'loc']}",
-    key="selected_row"
+    format_func=lambda idx: f"{recordings_df.loc[idx,'gen']} - {recordings_df.loc[idx,'sp']} - {recordings_df.loc[idx,'en']} - {recordings_df.loc[idx,'loc']} - {recordings_df.loc[idx,'type']}",
+    key="selected_row",
 )
 
-# Update the audio player to play the recording of the selected row
-audio_file_url = recordings_df.loc[st.session_state["selected_row"], 'file']
+# ---- AUDIO PLAYER ----
+audio_file_url = recordings_df.loc[st.session_state["selected_row"], "file"]
 st.audio(audio_file_url)
 
-# Display the full table without filtering
-st.dataframe(recordings_df)
+# ---- FILTERED TABLE BASED ON MAP SELECTION ----
+filtered_df = recordings_df.loc[[st.session_state["selected_row"]]]
+st.dataframe(filtered_df)
