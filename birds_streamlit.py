@@ -61,7 +61,7 @@ selected_row = st.selectbox(
     "Select a recording to play:",
     recordings_df.index,
     index=recordings_df.index.get_loc(st.session_state["selected_row"]),
-    format_func=lambda idx: f"{recordings_df.loc[idx, 'gen']} - {recordings_df.loc[idx, 'sp']} - {recordings_df.loc[idx, 'en']}",
+    format_func=lambda idx: f"{recordings_df.loc[idx, 'gen']} - {recordings_df.loc[idx, 'sp']} - {recordings_df.loc[idx, 'en']} - {recordings_df.loc[idx, 'loc']}",
     key="selected_row"
 )
 
