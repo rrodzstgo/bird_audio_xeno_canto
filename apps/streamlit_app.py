@@ -48,11 +48,8 @@ def main():
 
     # Create and display map
     st.subheader("Recording Locations")
-    col_map, col_player = st.columns([2, 1])
-    
-    with col_map:
-        m = create_recording_map(recordings_df)
-        map_data = st_folium(m, width=100, height=500)
+    m = create_recording_map(recordings_df)
+    st_folium(m, width=1200, height=500)
 
     # Display recording details
     st.subheader("Recording Information")
