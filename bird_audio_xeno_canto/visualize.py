@@ -15,11 +15,24 @@ def create_recording_map(recordings_df: pd.DataFrame) -> folium.Map:
     Returns:
         Folium map object
     """
+    # Set center to Puerto Rico center (approximately)
+    # This ensures the map focuses on Puerto Rico even if recording data is sparse
+    puerto_rico_center = [18.22, -66.59]
+    
+    # Calculate bounds to fit all markers
+    min_lat = recordings_df["lat"].min()
+    max_lat = recordings_df["lat"].max()
+    min_lng = recordings_df["lng"].min()
+    max_lng = recordings_df["lng"].max()
+    
     # Initialize map centered on Puerto Rico
     m = folium.Map(
-        location=[recordings_df["lat"].mean(), recordings_df["lng"].mean()],
-        zoom_start=7,
+        location=puerto_rico_center,
+        zoom_start=9,
     )
+    
+    # Fit map to show all markers
+    m.fit_bounds([[min_lat, min_lng], [max_lat, max_lng]], padding=(0.1, 0.1))
 
     # Add markers for each recording
     for idx, row in recordings_df.iterrows():
@@ -50,6 +63,6 @@ def get_marker_color(idx: int) -> str:
     Returns:
         Color string for marker
     """
-    if "selected_row" in st.session_state and idx == st.session_state["selected_row"]:
+    if "selected_idx" in st.session_state and idx == st.session_state["selected_idx"]:
         return "red"  # highlight selected
     return "blue"     # default color

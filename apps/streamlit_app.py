@@ -62,7 +62,7 @@ def main():
         closest_idx = distances.idxmin()
         st.session_state["selected_idx"] = closest_idx
 
-    # Display recording details
+    # Display recording statistics
     st.subheader("Recording Information")
     col1, col2 = st.columns(2)
 
