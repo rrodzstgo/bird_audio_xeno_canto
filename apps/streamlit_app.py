@@ -42,14 +42,25 @@ def main():
     recordings_df = load_recordings(data_path)
     recordings_df = process_recordings(recordings_df)
 
-    # Initialize session state
-    if "selected_row" not in st.session_state:
-        st.session_state["selected_row"] = recordings_df.index[0]
+    # Initialize session state for selection
+    if "selected_idx" not in st.session_state:
+        st.session_state["selected_idx"] = 0
 
     # Create and display map
     st.subheader("Recording Locations")
     m = create_recording_map(recordings_df)
-    st_folium(m, width=1200, height=500)
+    map_data = st_folium(m, width=1200, height=500)
+    
+    # Handle map marker clicks
+    if map_data and map_data.get("last_clicked"):
+        clicked_lat = map_data["last_clicked"]["lat"]
+        clicked_lng = map_data["last_clicked"]["lng"]
+        
+        # Find the closest recording to the click
+        distances = ((recordings_df["lat"] - clicked_lat) ** 2 + 
+                    (recordings_df["lng"] - clicked_lng) ** 2) ** 0.5
+        closest_idx = distances.idxmin()
+        st.session_state["selected_idx"] = closest_idx
 
     # Display recording details
     st.subheader("Recording Information")
@@ -75,9 +86,13 @@ def main():
         selected_idx = st.selectbox(
             "Choose a recording:",
             range(len(recording_options)),
+            index=st.session_state.get("selected_idx", 0),
             format_func=lambda i: recording_options[i],
             key="recording_selector"
         )
+        
+        # Update session state when manually changed
+        st.session_state["selected_idx"] = selected_idx
         
         # Get selected recording
         selected_recording = recordings_df.iloc[selected_idx]
