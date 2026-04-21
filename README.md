@@ -56,20 +56,36 @@ Run the app in a containerized environment with Docker and Docker Compose:
 # Build and start the container
 docker-compose up --build
 
-# Check which port was assigned
+# In another terminal, check which port was assigned
 docker-compose ps
 
-# Access the app at http://localhost:<PORT>
-# (replace <PORT> with the value shown in docker-compose ps)
+# The output shows the port mapping, e.g.:
+# PORTS: 0.0.0.0:32768->8501/tcp
+# Access the app at http://localhost:32768
 ```
 
-**Benefits of Docker:**
-- No local Python environment setup required
-- Consistent environment across different machines
-- Easy to deploy to cloud platforms
-- Automatic port assignment to avoid conflicts
+**Get the port quickly:**
+```bash
+docker-compose ps --format "table {{.Ports}}" | tail -1
+```
 
-To stop the container:
+**Port Assignment:**
+- The compose.yml uses automatic port assignment (`0:8501`)
+- Docker selects any available port to avoid conflicts
+- The port may be different each time you restart
+- Always check `docker-compose ps` to find the current port
+
+**Fixed Port Alternative:**
+
+If you prefer a fixed port, edit `compose.yml`:
+```yaml
+ports:
+  - "8501:8501"  # Always use port 8501
+```
+
+Then access at `http://localhost:8501`
+
+**Stop the container:**
 ```bash
 docker-compose down
 ```
