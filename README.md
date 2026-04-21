@@ -56,39 +56,20 @@ Run the app in a containerized environment with Docker and Docker Compose:
 # Build and start the container
 docker-compose up --build
 
-# In another terminal, check which port was assigned
-docker-compose ps
-
-# The output shows the port mapping, e.g.:
-# PORTS: 0.0.0.0:32768->8501/tcp
-# Access the app at http://localhost:32768
+# The app will be available at http://localhost:8501
 ```
 
-**Get the port quickly:**
-```bash
-docker-compose ps --format "table {{.Ports}}" | tail -1
-```
-
-**Port Assignment:**
-- The compose.yml uses automatic port assignment (`0:8501`)
-- Docker selects any available port to avoid conflicts
-- The port may be different each time you restart
-- Always check `docker-compose ps` to find the current port
-
-**Fixed Port Alternative:**
-
-If you prefer a fixed port, edit `compose.yml`:
-```yaml
-ports:
-  - "8501:8501"  # Always use port 8501
-```
-
-Then access at `http://localhost:8501`
+The app runs at **http://localhost:8501** every time (fixed port configuration).
 
 **Stop the container:**
 ```bash
 docker-compose down
 ```
+
+**Port Configuration:**
+- Fixed port mapping: `8501:8501`
+- Consistent URL across restarts: `http://localhost:8501`
+- If port 8501 is already in use, edit `compose.yml` and change `8501:8501` to `8502:8501` (or any available port)
 
 ## Project Structure
 
