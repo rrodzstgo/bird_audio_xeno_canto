@@ -1,0 +1,12 @@
+services:
+  bird-app:
+    build: .
+    container_name: bird-audio-app
+    ports:
+      - "8502:8501"
+    volumes:
+      - ./data:/app/data
+      - ./audio_files:/app/audio_files
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - PYTHONUNBUFFERED=1
