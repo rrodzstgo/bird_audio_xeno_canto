@@ -48,6 +48,32 @@ source ve/bin/activate
 streamlit run apps/streamlit_app.py
 ```
 
+### Docker Deployment
+
+Run the app in a containerized environment with Docker and Docker Compose:
+
+```bash
+# Build and start the container
+docker-compose up --build
+
+# Check which port was assigned
+docker-compose ps
+
+# Access the app at http://localhost:<PORT>
+# (replace <PORT> with the value shown in docker-compose ps)
+```
+
+**Benefits of Docker:**
+- No local Python environment setup required
+- Consistent environment across different machines
+- Easy to deploy to cloud platforms
+- Automatic port assignment to avoid conflicts
+
+To stop the container:
+```bash
+docker-compose down
+```
+
 ## Project Structure
 
 ```
