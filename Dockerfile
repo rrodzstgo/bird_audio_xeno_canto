@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project files
-COPY pyproject.toml uv.lock* .
+COPY pyproject.toml uv.lock* ./
 COPY bird_audio_xeno_canto/ ./bird_audio_xeno_canto/
 COPY apps/ ./apps/
 COPY data/ ./data/
@@ -17,11 +17,19 @@ COPY data/ ./data/
 # Install Python dependencies
 RUN pip install --no-cache-dir -e .
 
-# Create .streamlit directory
-RUN mkdir -p /root/.streamlit
+# Create non-root user for security
+RUN useradd -m -u 1000 appuser
 
-# Copy Streamlit config (we'll create this next)
-COPY .streamlit/config.toml /root/.streamlit/config.toml
+# Create Streamlit config directory with proper permissions
+RUN mkdir -p /home/appuser/.streamlit && \
+    chown -R appuser:appuser /app /home/appuser/.streamlit
+
+# Copy Streamlit config
+COPY .streamlit/config.toml /home/appuser/.streamlit/config.toml
+RUN chown appuser:appuser /home/appuser/.streamlit/config.toml
+
+# Switch to non-root user
+USER appuser
 
 # Expose Streamlit port
 EXPOSE 8501

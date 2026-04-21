@@ -17,17 +17,23 @@ def download_file(url: str, save_path: str) -> bool:
         True if successful, False otherwise
     """
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=30, verify=True)
         if response.status_code == 200:
             with open(save_path, "wb") as file:
                 file.write(response.content)
             print(f"Downloaded {save_path}")
             return True
         else:
-            print(f"Failed to download {url}")
+            print(f"Failed to download {url}: Status {response.status_code}")
             return False
-    except Exception as e:
+    except requests.exceptions.Timeout:
+        print(f"Timeout downloading {url} (exceeded 30s)")
+        return False
+    except requests.exceptions.RequestException as e:
         print(f"Error downloading {url}: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error downloading {url}: {e}")
         return False
 
 
