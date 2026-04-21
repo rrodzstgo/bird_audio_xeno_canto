@@ -4,3 +4,17 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .DS_Store
+
+# Environment and secrets
+.env
+.env.local
+.streamlit/secrets.toml
+
+# Downloaded files
+audio_files/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
